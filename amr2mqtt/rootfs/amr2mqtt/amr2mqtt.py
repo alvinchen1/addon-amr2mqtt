@@ -43,6 +43,15 @@ ALL_IDM = [
     "SerialNumberCRC",
     "PacketCRC",
 ]
+ALL_R900 = [
+    "Unkn1",
+    "NoUse",
+    "BackFlow",
+    "Unkn3",
+    "Leak",
+    "LeakNow",
+    "checksum",
+]
 ATTRIBUTES = {
     "idm": [
         "ModuleProgrammingState",
@@ -57,15 +66,8 @@ ATTRIBUTES = {
         "LastConsumption",
     ]
     + ALL_IDM,
-    "r900": [
-        "Unkn1",
-        "NoUse",
-        "BackFlow",
-        "Unkn3",
-        "Leak",
-        "LeakNow",
-        "checksum",
-    ],
+    "r900": ALL_R900,
+    "r900bcd": ALL_R900,
     "scm": [
         "Type",
         "TamperPhy",
@@ -394,6 +396,7 @@ def main_loop():
 
             amr_message = amr_dict["Message"]
             amr_time = parser.parse(amr_dict["Time"])
+            amr_type = amr_dict["Type"]
             fields_count = len(amr_message.values())
 
             # IDM results have 17 fields
@@ -426,8 +429,8 @@ def main_loop():
 
             # R900 results have 9 fields according to docs. But user reports
             # suggest 8. Accept both since I don't have an R900 to test
-            elif fields_count in [8, 9]:
-                msg_type = "r900"
+            elif amr_type == "R900" or amr_type == "R900BCD":
+                msg_type = amr_type.lower()
                 meter_id = str(amr_message[ID_FIELD])
                 adjust_reading(
                     reading_time=amr_time,
